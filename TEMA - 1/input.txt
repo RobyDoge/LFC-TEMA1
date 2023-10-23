@@ -1,5 +1,5 @@
-ab,cd,ef
-gh,ij,kl
+ab cd ef
+gh ij kl
 ab
 ab ijab
 cd kl

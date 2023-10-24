@@ -1,6 +1,8 @@
-ab cd ef
-gh ij kl
-ab
-ab ijab
-cd kl
-ef kl
+S A
+a b
+S
+S abS
+S aSAb
+S aA
+A aAb
+A a

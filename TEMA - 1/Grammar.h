@@ -9,6 +9,7 @@ class Grammar
 public:
 	Grammar();
 	Grammar(std::ifstream& input);
+	bool validateGrammar();
 
 
 private:

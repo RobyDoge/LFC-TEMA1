@@ -56,3 +56,53 @@ std::vector<std::pair<std::string, std::string>> Grammar::CreateVectorP(std::ifs
 	return auxP;
 }
 
+bool Grammar::validateGrammar()
+{
+	// Rule 1: VN intersected with VT must be an empty set
+	for (const std::string& vn : m_vn) {
+		if (std::find(m_vt.begin(), m_vt.end(), vn) != m_vt.end()) {
+			return false;
+		}
+	}
+
+	// Rule 2: S must be in VN
+	if (std::find(m_vn.begin(), m_vn.end(), m_s) == m_vn.end()) {
+		return false;
+	}
+
+	// Rule 3: For each rule, the left side must contain at least one nonterminal
+	for (const auto& rule : m_p) {
+		bool hasNonterminal = false;
+		for (const auto& c : rule.first) {
+			if (std::find(m_vn.begin(), m_vn.end(), c) != m_vn.end()) {
+				hasNonterminal = true;
+				break;
+			}
+		}
+		if (!hasNonterminal) {
+			return false;
+		}
+	}
+
+	// Rule 4: There must be at least one rule that has only S on the left-hand side
+	bool hasSRule = false;
+	for (const auto& rule : m_p) {
+		if (rule.first == m_s) {
+			hasSRule = true;
+			break;
+		}
+	}
+	if (!hasSRule) {
+		return false;
+	}
+
+	// Rule 5: Every rule must contain only elements from VN and VT
+	for (const auto& rule : m_p) {
+		for (const auto& c : rule.second) {
+			if (std::find(m_vn.begin(), m_vn.end(), c) == m_vn.end() &&
+				std::find(m_vt.begin(), m_vt.end(), c) == m_vt.end()) {
+				return false;
+			}
+		}
+	}
+}

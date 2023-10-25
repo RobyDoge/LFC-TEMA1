@@ -6,7 +6,7 @@ Grammar::Grammar(std::ifstream& input)
 	std::string aux;
 	std::getline(input,aux);
 	std::istringstream NonSplitStream(aux);
-	m_vn = CreateMultime(NonSplitStream);
+	m_vn = SepareteBySpaces(NonSplitStream);
 	std::getline(input, aux);
 	
 	//clears and resets the istringstream 
@@ -15,7 +15,7 @@ Grammar::Grammar(std::ifstream& input)
 
 	//reads the second line and puts the elements separted by space in m_vt
 	NonSplitStream.str(aux);
-	m_vt = CreateMultime(NonSplitStream);
+	m_vt = SepareteBySpaces(NonSplitStream);
 
 	//reads the third line and writes it in m_s
 	std::getline(input ,m_s);
@@ -23,10 +23,40 @@ Grammar::Grammar(std::ifstream& input)
 	//reads the lines until the end of the file and puts the pair of rules in m_p
 	m_p = CreateVectorP(input);
 	input.close();
+
+
+	if (!ValidateGrammar())
+	{
+		m_p.clear();
+		m_s.erase();
+		m_vn.clear();
+		m_vt.clear();
+		throw std::exception("Incorrect Grammar");
+	}
 }
 
-//it separets a line into words separated my spaces and puts the words in a vector
-std::vector<std::string> Grammar::CreateMultime(std::istringstream& NonSplitStream)
+std::vector<std::string> Grammar::GetVn()
+{
+	return m_vn;
+}
+
+std::vector<std::string> Grammar::GetVt()
+{
+	return m_vt;
+}
+
+std::string Grammar::GetS()
+{
+	return m_s;
+}
+
+std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Grammar::GetP()
+{
+	return m_p;
+}
+
+//it separets a line into words separated by spaces and puts the words into a vector
+std::vector<std::string> Grammar::SepareteBySpaces(std::istringstream& NonSplitStream)
 {
 	std::vector<std::string> auxVector;
 	std::string word;
@@ -38,25 +68,50 @@ std::vector<std::string> Grammar::CreateMultime(std::istringstream& NonSplitStre
 
 }
 
-//it creats a pair out of the two elements of a line and deposits them in a vector
-std::vector<std::pair<std::string, std::string>> Grammar::CreateVectorP(std::ifstream& input)
+//it separets a line into words separated by commas and puts the words into a vector
+std::vector<std::string> Grammar::SepareteByComma(std::istringstream& NonSplitStream)
 {
-	std::vector<std::pair<std::string, std::string>> auxP;
+	std::vector<std::string> auxVector;
+	std::string word;
+	while (std::getline(NonSplitStream, word, ','))
+	{
+		auxVector.push_back(word);
+	}
+	return auxVector;
+
+}
+
+//it creats a pair out of the two elements of a line and deposits them in a vector
+std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Grammar::CreateVectorP(std::ifstream& input)
+{
+	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> auxP;
 	while(!input.eof())
 	{
-		std::string NonSplitRule;
-		std::getline(input, NonSplitRule);
-		std::istringstream NonSplitRuleStream(NonSplitRule);
-		std::string aux1,aux2;
-		NonSplitRuleStream >> aux1 >> aux2;
+		//Reads the first half of the rule
+		std::string NonSplitHalfOfRule;
+		input>> NonSplitHalfOfRule;
+		std::istringstream NonSplitHalfOfRuleStream(NonSplitHalfOfRule);
+
+		//aux1 is a vector of all the elements in the first half on the rule
+		std::vector<std::string> aux1 = SepareteByComma(NonSplitHalfOfRuleStream);
+
+		//reads the second half of the rule
+		input >> NonSplitHalfOfRule;
+
+		//adds the new rule in the stream for splitting
+		NonSplitHalfOfRuleStream.clear();
+		NonSplitHalfOfRuleStream.str(NonSplitHalfOfRule);
+
+		//aux2 is a vector of all the elements in the second half on the rule
+		std::vector<std::string> aux2 = SepareteByComma(NonSplitHalfOfRuleStream);
+
 		auxP.push_back({ aux1,aux2});
-		
 	}
 
 	return auxP;
 }
 
-bool Grammar::validateGrammar()
+bool Grammar::ValidateGrammar()
 {
 	// Rule 1: VN intersected with VT must be an empty set
 	for (const std::string& vn : m_vn) {
@@ -87,7 +142,7 @@ bool Grammar::validateGrammar()
 	// Rule 4: There must be at least one rule that has only S on the left-hand side
 	bool hasSRule = false;
 	for (const auto& rule : m_p) {
-		if (rule.first == m_s) {
+		if (rule.first.size()==1 && rule.first[0]==m_s) {
 			hasSRule = true;
 			break;
 		}
@@ -105,4 +160,34 @@ bool Grammar::validateGrammar()
 			}
 		}
 	}
+}
+
+std::ostream& operator<<(std::ostream& out, Grammar grammar)
+{
+	out << "Multimea elementelor Neterminale sunt:\n";
+	for (const auto& aux : grammar.m_vn)
+	{
+		out << aux << " ";
+	}
+	out << "\n\nMultimea elementelor Termianle sunt:\n";
+	for (const auto& aux : grammar.m_vt)
+	{
+		out << aux << " ";
+	}
+	out << "\n\nElementul de start este: "<<grammar.m_s<<std::endl;
+	out << "\nMultimea regurilor sunt:\n";
+	for (const auto& aux : grammar.m_p)
+	{
+		for (const auto& aux1 : aux.first)
+		{
+			out << aux1 << " ";
+		}
+		out << "-> ";
+		for (const auto& aux1 : aux.second)
+		{
+			out << aux1 << " ";
+		}
+		out << std::endl;
+	}
+	return out;
 }

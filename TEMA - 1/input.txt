@@ -1,6 +1,8 @@
-ab cd ef
-gh ij kl
-ab
-ab ij
-cd,gh,ij kl
-ef,kl,cd ab
+S A
+a b
+S
+S a,b,S 
+S a,S,A,b
+S a,A
+A a,A,b
+A a

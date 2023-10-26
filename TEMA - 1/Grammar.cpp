@@ -1,4 +1,6 @@
-#include "Grammar.h"
+﻿#include "Grammar.h"
+#include <numeric>
+#include <random>
 
 Grammar::Grammar(std::ifstream& input)
 {
@@ -159,23 +161,29 @@ bool Grammar::ValidateGrammar()
 				return false;
 			}
 		}
+		for (const auto& c : rule.first) {
+			if (std::find(m_vn.begin(), m_vn.end(), c) == m_vn.end() &&
+				std::find(m_vt.begin(), m_vt.end(), c) == m_vt.end()) {
+				return false;
+			}
+		}
 	}
 }
 
 std::ostream& operator<<(std::ostream& out, Grammar grammar)
 {
-	out << "Multimea elementelor Neterminale sunt:\n";
+	out << "Grammar: G = ({";
 	for (const auto& aux : grammar.m_vn)
 	{
 		out << aux << " ";
 	}
-	out << "\n\nMultimea elementelor Termianle sunt:\n";
+	out << "},{";
 	for (const auto& aux : grammar.m_vt)
 	{
 		out << aux << " ";
 	}
-	out << "\n\nElementul de start este: "<<grammar.m_s<<std::endl;
-	out << "\nMultimea regurilor sunt:\n";
+	out << "},"<<grammar.m_s<<", P)";
+	out << " P containing the following productions:\n";
 	for (const auto& aux : grammar.m_p)
 	{
 		for (const auto& aux1 : aux.first)
@@ -185,9 +193,63 @@ std::ostream& operator<<(std::ostream& out, Grammar grammar)
 		out << "-> ";
 		for (const auto& aux1 : aux.second)
 		{
-			out << aux1 << " ";
+			out << aux1;
 		}
 		out << std::endl;
 	}
 	return out;
+}
+
+
+void Grammar::generateRandomWord(const std::string& word) {
+	if (word == m_s)
+		std::cout << m_s;
+	    std::string producedWord = word;
+		std::vector<int> applicable_productions;
+
+		// Check if one of the rules from the left side is applicable for the producedWord 
+		// Because we used a std::vector<std::string>> ,used the accumulate funtion to make the vector into only one string
+
+		for (int i = 0; i < m_p.size(); i++) {
+			if (producedWord.find(std::accumulate(m_p[i].first.begin(), m_p[i].first.end(), std::string(""))) != std::string::npos) {
+				applicable_productions.push_back(i);
+			}
+		}
+	    // If there are no applicable functions return from the recursive function
+		if (applicable_productions.empty()) {
+			return;
+		}
+		else std::cout << " => ";
+
+		// Generate a random index to use for a production
+		std::random_device rd;
+		std::mt19937 gen(rd()); 
+		std::uniform_int_distribution<> distr(0, applicable_productions.size()-1);
+		int chosen_production = applicable_productions[distr(gen)];
+
+		//Apply the random production to the producedWord
+		std::string new_word = applyRandomProduction(producedWord, chosen_production);
+
+		//This should not really happen but just for safety so we don`t have an infinite loop
+		if (new_word == producedWord) {
+			return ;
+		}
+		
+		std::cout<< new_word;
+		generateRandomWord(new_word);
+}
+
+std::string Grammar::applyRandomProduction(const std::string& input, int production_index) {
+	std::string producedWord = input;
+	std::string left = std::accumulate(m_p[production_index].first.begin(), m_p[production_index].first.end(), std::string(""));
+	std::string right = std::accumulate(m_p[production_index].second.begin(), m_p[production_index].second.end(), std::string(""));
+
+	//Search the position of the left side of the production in the producedWord
+	int pos = producedWord.find(left);
+	
+	//If the position is valid , replace the left side with the right side 
+	if (pos != std::string::npos) {
+		producedWord.replace(pos, left.length(), right);
+	}
+	return producedWord;
 }

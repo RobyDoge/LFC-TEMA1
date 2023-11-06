@@ -57,6 +57,34 @@ std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Gramm
 	return m_p;
 }
 
+bool Grammar::IsRegular()
+{
+	for (const auto& rule : m_p)
+	{
+		if (rule.second.size() > 2)
+		{
+			return false;
+		}
+		if (rule.first.size() > 1)
+		{
+			return false;
+		}
+		if (std::find(m_vt.begin(), m_vt.begin(), rule.first[0])!=m_vt.end())
+		{
+			return false;
+		}
+		if (std::find(m_vn.begin(), m_vn.begin(), rule.second[0]) != m_vn.end())
+		{
+			return false;
+		}
+		if (rule.second.size() == 2 && std::find(m_vt.begin(), m_vt.begin(), rule.second[1]) != m_vt.end())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 //it separets a line into words separated by spaces and puts the words into a vector
 std::vector<std::string> Grammar::SepareteBySpaces(std::istringstream& NonSplitStream)
 {
@@ -213,10 +241,10 @@ std::ostream& operator<<(std::ostream& out, Grammar grammar)
 }
 
 
-void Grammar::GenerateRandomWord(const std::string& word)
+void Grammar::GenerateRandomWord(const std::string& word, std::ostream& outputStream, bool printSteps)
 {
 	if (word == m_s)
-		std::cout << m_s;
+		outputStream << m_s;
 	std::string producedWord = word;
 	std::vector<int> applicable_productions;
 
@@ -229,12 +257,18 @@ void Grammar::GenerateRandomWord(const std::string& word)
 			applicable_productions.push_back(i);
 		}
 	}
+
 	// If there are no applicable functions return from the recursive function
 	if (applicable_productions.empty()) 
 	{
+		if (!printSteps)
+			outputStream << " => " << word;
 		return;
 	}
-	else std::cout << " => ";
+	else if(printSteps)
+	{
+		outputStream << " => ";
+	}
 
 	// Generate a random index to use for a production
 	std::random_device rd;
@@ -250,9 +284,10 @@ void Grammar::GenerateRandomWord(const std::string& word)
 	{
 		return;
 	}
-
-	std::cout << new_word;
-	GenerateRandomWord(new_word);
+	if (printSteps)
+		outputStream << new_word;
+	GenerateRandomWord(new_word,outputStream,printSteps);
+	
 }
 
 std::string Grammar::ApplyRandomProduction(const std::string& input, int production_index) 

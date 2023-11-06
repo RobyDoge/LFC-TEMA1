@@ -15,8 +15,9 @@ public:
 	std::vector<std::string> GetVt();
 	std::string GetS();
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> GetP();
+	bool IsRegular();
 
-	void GenerateRandomWord(const std::string& word);
+	void GenerateRandomWord(const std::string& word,std::ostream& outputStream,bool printSteps);
 	friend std::ostream& operator<<(std::ostream& out, Grammar grammar);
 
 

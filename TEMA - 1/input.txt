@@ -1,8 +1,8 @@
-S A
+SCD ABN lambda 
 a b
-S
-S a,b,S 
-S a,S,A,b
-S a,A
-A a,A,b
-A a
+SCD
+SCD a,b,SCD 
+SCD a,SCD,ABN,b
+SCD a,ABN
+ABN a,ABN,b
+ABN lambda

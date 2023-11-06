@@ -8,6 +8,6 @@ int main()
 	Grammar gramatica(input);
 	std::cout << gramatica;
 	std::cout << "Generating a word: \n";
-	gramatica.generateRandomWord(gramatica.GetS());
+	gramatica.GenerateRandomWord(gramatica.GetS());
 	return 0;
 }

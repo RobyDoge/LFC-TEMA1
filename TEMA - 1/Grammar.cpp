@@ -141,60 +141,33 @@ bool Grammar::ValidateGrammar()
 		return false;
 	}
 
-	// Rule 3: For each rule, the left side must contain at least one nonterminal
-	for (const auto& [fst,snd] : m_p )
+	return std::ranges::all_of(m_p, [&](const auto& rule)
 	{
-		bool hasNonterminal = false;
-		for (const auto& c : fst)
-		{
-			if (std::ranges::find(m_vn, c) != m_vn.end())
-			{
-				hasNonterminal = true;
-				break;
-			}
-		}
-		if (!hasNonterminal)
-		{
-			return false;
-		}
-	}
+		return HasSRule() && HasNonterminal() && ContainsOnlyVnAndVt(rule.first) && ContainsOnlyVnAndVt(rule.second);
+	});
+}
 
-	// Rule 4: There must be at least one rule that has only S on the left-hand side
-	bool hasSRule = false;
-	for (const auto& [fst, snd] : m_p)
-	{
-		if (fst.size() == 1 && fst[0] == m_s)
-		{
-			hasSRule = true;
-			break;
-		}
-	}
-	if (!hasSRule)
-	{
-		return false;
-	}
+bool Grammar::HasSRule()
+{
+	return std::ranges::any_of(m_p, [this](const auto& rule) {
+		return rule.first.size() == 1 && rule.first[0] == m_s;
+	});
+}
 
-	// Rule 5: Every rule must contain only elements from VN and VT
-	for (const auto& [fst, snd] : m_p)
-	{
-		for (const auto& c : snd)
-		{
-			if (std::ranges::find(m_vn, c) == m_vn.end() &&
-				std::ranges::find(m_vt, c) == m_vt.end())
-			{
-				return false;
-			}
-		}
-		for (const auto& c : fst)
-		{
-			if (std::ranges::find(m_vn, c) == m_vn.end() &&
-				std::ranges::find(m_vt, c) == m_vt.end())
-			{
-				return false;
-			}
-		}
-	}
-	return true;
+bool Grammar::ContainsOnlyVnAndVt(std::vector<std::string> symbols)
+{
+	return std::ranges::all_of(symbols, [&](const std::string& symbol) {
+		return std::ranges::find(m_vn, symbol) != m_vn.end() || std::ranges::find(m_vt, symbol) != m_vt.end();
+	});
+}
+
+bool Grammar::HasNonterminal()
+{
+	return std::ranges::all_of(m_p, [this](const auto& rule){
+		return std::ranges::all_of(rule.first, [this](const auto& input) {
+			return std::ranges::find(m_vn, input) != m_vn.end();
+		});
+	});
 }
 
 std::ostream& operator<<(std::ostream& out, const Grammar& grammar)

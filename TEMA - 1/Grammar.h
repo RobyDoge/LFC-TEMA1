@@ -27,7 +27,11 @@ private:
 	std::vector<std::string> SeparateByComma(std::istringstream& nonSplitStream);
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> CreateVectorP(std::ifstream& input);
 	bool ValidateGrammar();
-	
+	bool HasSRule();
+	bool ContainsOnlyVnAndVt(std::vector<std::string> symbols);
+	bool HasNonterminal();
+
+private:
 	std::vector<std::string> m_vn;
 	std::vector<std::string> m_vt;
 	std::string m_s;

@@ -5,11 +5,11 @@
 int main()
 {
 	std::ifstream input("input.txt");
-	Grammar gramatica(input);
-	std::cout << gramatica;
+	Grammar grammar(input);
+	std::cout << grammar;
 	std::cout << "Generating a word: \n";
-	gramatica.GenerateRandomWord(gramatica.GetS(), std::cout, 1);
+	grammar.GenerateRandomWord(grammar.GetS(), std::cout, true);
 
-	if (gramatica.IsRegular())
+	if (grammar.IsRegular())
 	return 0;
 }

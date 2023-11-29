@@ -60,7 +60,8 @@ std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Gramm
 
 bool Grammar::IsRegular()
 {
-	return std::ranges::all_of(m_p, [&](const auto& rule) {
+	return std::ranges::all_of(m_p, [&](const auto& rule)
+	{
 		const auto& [fst, snd] = rule;
 		return snd.size() <= 2 &&
 			fst.size() <= 1 &&
@@ -126,7 +127,6 @@ std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Gramm
 
 bool Grammar::ValidateGrammar()
 {
-	// Rule 1: VN intersected with VT must be an empty set
 	for (const std::string& vn : m_vn)
 	{
 		if (std::ranges::find(m_vt, vn) != m_vt.end())
@@ -135,7 +135,6 @@ bool Grammar::ValidateGrammar()
 		}
 	}
 
-	// Rule 2: S must be in VN
 	if (std::ranges::find(m_vn, m_s) == m_vn.end())
 	{
 		return false;
@@ -149,22 +148,26 @@ bool Grammar::ValidateGrammar()
 
 bool Grammar::HasSRule()
 {
-	return std::ranges::any_of(m_p, [this](const auto& rule) {
+	return std::ranges::any_of(m_p, [this](const auto& rule)
+	{
 		return rule.first.size() == 1 && rule.first[0] == m_s;
 	});
 }
 
 bool Grammar::ContainsOnlyVnAndVt(std::vector<std::string> symbols)
 {
-	return std::ranges::all_of(symbols, [&](const std::string& symbol) {
+	return std::ranges::all_of(symbols, [&](const std::string& symbol)
+	{
 		return std::ranges::find(m_vn, symbol) != m_vn.end() || std::ranges::find(m_vt, symbol) != m_vt.end();
 	});
 }
 
 bool Grammar::HasNonterminal()
 {
-	return std::ranges::all_of(m_p, [this](const auto& rule){
-		return std::ranges::all_of(rule.first, [this](const auto& input) {
+	return std::ranges::all_of(m_p, [this](const auto& rule)
+	{
+		return std::ranges::all_of(rule.first, [this](const auto& input)
+		{
 			return std::ranges::find(m_vn, input) != m_vn.end();
 		});
 	});
@@ -175,15 +178,15 @@ std::ostream& operator<<(std::ostream& out, const Grammar& grammar)
 	out << "Grammar: G = ({";
 	for (const auto& aux : grammar.m_vn)
 	{
-		out << aux << " ";
+		out << aux << " , ";
 	}
 	out << "},{";
 	for (const auto& aux : grammar.m_vt)
 	{
-		out << aux << " ";
+		out << aux << " , ";
 	}
-	out << "}," << grammar.m_s << ", P)";
-	out << " P containing the following productions:\n";
+	out << "}," << grammar.m_s << ", P)"
+		<< ".\nP containing the following productions:\n";
 	for (const auto& [fst, snd] : grammar.m_p)
 	{
 		for (const auto& aux1 : fst)

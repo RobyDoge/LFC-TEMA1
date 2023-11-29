@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <iostream>
+
 
 class Grammar
 {
@@ -15,11 +15,11 @@ public:
 	std::vector<std::string> GetVt();
 	std::string GetS();
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> GetP();
+
 	bool IsRegular();
-
 	void GenerateRandomWord(const std::string& word,std::ostream& outputStream,bool printSteps);
-	friend std::ostream& operator<<(std::ostream& out, const Grammar& grammar);
 
+	friend std::ostream& operator<<(std::ostream& out, const Grammar& grammar);
 
 private:
 	std::string ApplyRandomProduction(const std::string& input, int production_index);

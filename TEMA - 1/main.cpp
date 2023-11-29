@@ -10,5 +10,6 @@ int main()
 	std::cout << "Generating a word: \n";
 	gramatica.GenerateRandomWord(gramatica.GetS(), std::cout, 1);
 
+	if (gramatica.IsRegular())
 	return 0;
 }

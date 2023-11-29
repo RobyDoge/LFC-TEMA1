@@ -1,8 +1,6 @@
 SCD ABN lambda 
 a b
 SCD
-SCD a,b,SCD 
-SCD a,SCD,ABN,b
+SCD a
 SCD a,ABN
-ABN a,ABN,b
-ABN lambda
+ABN a

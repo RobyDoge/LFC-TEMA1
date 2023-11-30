@@ -1,11 +1,90 @@
 ﻿#include "FiniteAutomaton.h"
 #include <algorithm>
+#include <ranges>
+#include <sstream>
+
 
 bool FiniteAutomaton::VerifyAutomaton()
 {
 	return StartingStateValidation() &&
 		FinalStatesValidation() &&
 		StateTransitionFunctionsValidation();
+}
+
+std::vector<std::string> FiniteAutomaton::GetStates() const
+{
+	return m_states;
+}
+
+void FiniteAutomaton::SetStates(const std::vector<std::string>& states)
+{
+	m_states = states;
+}
+
+std::vector<std::string> FiniteAutomaton::GetInputAlphabet() const
+{
+	return m_inputAlphabet;
+}
+
+void FiniteAutomaton::SetInputAlphabet(const std::vector<std::string>& inputAlphabet)
+{
+	m_inputAlphabet = inputAlphabet;
+}
+
+std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>>> FiniteAutomaton::
+GetStateTransitionFunctions() const
+{
+	return m_stateTransitionFunctions;
+}
+
+void FiniteAutomaton::SetStateTransitionFunctions(
+	const std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>>>&
+	stateTransitionFunctions)
+{
+	m_stateTransitionFunctions = stateTransitionFunctions;
+}
+
+std::string FiniteAutomaton::GetStartingState() const
+{
+	return m_startingState;
+}
+
+void FiniteAutomaton::SetStartingState(const std::string& startingState)
+{
+	m_startingState = startingState;
+}
+
+std::vector<std::string> FiniteAutomaton::GetFinalStates() const
+{
+	return m_finalStates;
+}
+
+void FiniteAutomaton::SetFinalStates(const std::vector<std::string>& finalStates)
+{
+	m_finalStates = finalStates;
+}
+
+bool FiniteAutomaton::IsDeterministic()
+{
+	return std::ranges::all_of(m_stateTransitionFunctions, [&](const auto& transitionFunction)
+	{
+		return std::ranges::any_of(transitionFunction.second, [&](const auto& outputState)
+		{
+			return outputState.size() > 1;
+		});
+	});
+}
+
+bool FiniteAutomaton::CheckWord(const std::string& word)
+{
+	std::vector<std::string> separatedWord = SeparateWord(word);
+
+	if (separatedWord.empty())
+	{
+		return false;
+	}
+
+
 }
 
 bool FiniteAutomaton::StartingStateValidation()
@@ -15,7 +94,7 @@ bool FiniteAutomaton::StartingStateValidation()
 
 bool FiniteAutomaton::FinalStatesValidation()
 {
-	return std::ranges::all_of(m_finalStates, [&](const auto& state)
+	return !m_finalStates.empty()&& std::ranges::all_of(m_finalStates, [&](const auto& state)
 	{
 		return std::ranges::find(m_states, state) != m_states.end();
 	});
@@ -32,6 +111,37 @@ bool FiniteAutomaton::StateTransitionFunctionsValidation()
 				return std::ranges::find(m_states, outputState) != m_states.end();
 			});
 	});
+}
+
+std::vector<std::string> FiniteAutomaton::SeparateWord(const std::string& word)
+{
+	std::string newWord = word;
+	bool validWord = true;
+	for (const auto& symbol : m_inputAlphabet)
+	{
+		size_t position = newWord.find(symbol);
+		while (position != std::string::npos)
+		{
+			newWord.insert(position + symbol.length(), " ");
+			position = newWord.find(symbol, position + symbol.length() + 1);
+		}
+	}
+	std::vector<std::string> stateChangeSequence{};
+	std::istringstream nonSplitStream(newWord);
+	std::string symbol{};
+	while (nonSplitStream >> symbol)
+	{
+		stateChangeSequence.push_back(symbol);
+	}
+
+	if (std::ranges::all_of(stateChangeSequence, [&](const auto& checkSymbol)
+			{
+				return std::ranges::find(m_inputAlphabet, checkSymbol) != m_inputAlphabet.end();
+			}))
+	{
+		return stateChangeSequence;
+	}
+	return {};
 }
 
 std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton)

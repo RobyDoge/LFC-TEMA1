@@ -8,17 +8,17 @@ Grammar::Grammar(std::ifstream& input)
 	//reads the first line and puts the elements separted by space in m_vn
 	std::string aux;
 	std::getline(input, aux);
-	std::istringstream NonSplitStream(aux);
-	m_vn = SeparateBySpaces(NonSplitStream);
+	std::istringstream nonSplitStream(aux);
+	m_vn = SeparateBySpaces(nonSplitStream);
 	std::getline(input, aux);
 
 	//clears and resets the istringstream 
-	NonSplitStream.clear();
-	NonSplitStream.seekg(0);
+	nonSplitStream.clear();
+	nonSplitStream.seekg(0);
 
 	//reads the second line and puts the elements separted by space in m_vt
-	NonSplitStream.str(aux);
-	m_vt = SeparateBySpaces(NonSplitStream);
+	nonSplitStream.str(aux);
+	m_vt = SeparateBySpaces(nonSplitStream);
 
 	//reads the third line and writes it in m_s
 	std::getline(input, m_s);
@@ -62,12 +62,12 @@ bool Grammar::IsRegular()
 {
 	return std::ranges::all_of(m_p, [&](const auto& rule)
 	{
-		const auto& [fst, snd] = rule;
-		return snd.size() <= 2 &&
-			fst.size() <= 1 &&
-			std::ranges::find(m_vt, fst[0]) == m_vt.end() &&
-			std::ranges::find(m_vn, snd[0]) == m_vn.end() &&
-			!(snd.size() == 2 && std::ranges::find(m_vt, snd[1]) != m_vt.end());
+		const auto& [input, output] = rule;
+		return output.size() <= 2 &&
+			input.size() <= 1 &&
+			std::ranges::find(m_vt, input[0]) == m_vt.end() &&
+			std::ranges::find(m_vn, output[0]) == m_vn.end() &&
+			!(output.size() == 2 && std::ranges::find(m_vt, output[1]) != m_vt.end());
 	});
 }
 
@@ -144,6 +144,7 @@ bool Grammar::ValidateGrammar()
 	{
 		return HasSRule() && HasNonterminal() && ContainsOnlyVnAndVt(rule.first) && ContainsOnlyVnAndVt(rule.second);
 	});
+
 }
 
 bool Grammar::HasSRule()
@@ -166,7 +167,7 @@ bool Grammar::HasNonterminal()
 {
 	return std::ranges::all_of(m_p, [this](const auto& rule)
 	{
-		return std::ranges::all_of(rule.first, [this](const auto& input)
+		return std::ranges::any_of(rule.first, [this](const auto& input)
 		{
 			return std::ranges::find(m_vn, input) != m_vn.end();
 		});
@@ -191,9 +192,9 @@ std::ostream& operator<<(std::ostream& out, const Grammar& grammar)
 	{
 		for (const auto& aux1 : fst)
 		{
-			out << aux1 << " ";
+			out << aux1;
 		}
-		out << "-> ";
+		out << " -> ";
 		for (const auto& aux1 : snd)
 		{
 			out << aux1;

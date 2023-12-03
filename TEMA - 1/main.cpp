@@ -36,7 +36,8 @@ int main()
     {
         FiniteAutomaton automaton(grammar);
         bool automatonGenerated = false;
-        std::string wordToCheck;
+        std::string word;
+        std::vector<std::string> wordToCheck;
     	do {
             std::cout << "\nMenu:\n";
             std::cout << "1. Print Grammar\n";
@@ -58,8 +59,8 @@ int main()
                 std::cin >> number_of_words;
                 while (number_of_words)
                 {
-                    wordToCheck = grammar.GetS();
-                    grammar.GenerateRandomWord(wordToCheck, std::cout, true);
+                    word = grammar.GetS();
+                    grammar.GenerateRandomWord(word, std::cout, true);
                     number_of_words--;
                 }
                 break;
@@ -77,7 +78,8 @@ int main()
                 }
                 
                 std::cout << "What word do you want to cehck?\n";
-                std::cin >> wordToCheck;
+                std::cin >> word;
+                wordToCheck = automaton.GenerateWordVector(word);
                 if (automaton.CheckWord(wordToCheck))
                     std::cout << "Word is accepted!";
                 else std::cout << "Word is not accepted!";
@@ -90,12 +92,13 @@ int main()
                     break;
                 }
                 std::cout << "GeneratedWord:\n";
-                wordToCheck = grammar.GetS();
-            	grammar.GenerateRandomWord(wordToCheck, std::cout, true);
+                word = grammar.GetS();
+                
+            	grammar.GenerateRandomWord(word, std::cout, true);
                 lastWord = grammar.GetLastWord();
-
+                wordToCheck = automaton.GenerateWordVector(lastWord);
                 std::cout << "\n" << lastWord<< "\n";
-                if (automaton.CheckWord(lastWord))
+                if (automaton.CheckWord(wordToCheck))
                     std::cout << "Word is accepted!";
                 else std::cout << "Word is not accepted!";
                 break;

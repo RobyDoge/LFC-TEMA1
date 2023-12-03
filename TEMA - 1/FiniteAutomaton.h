@@ -28,12 +28,15 @@ public:
 
 	bool VerifyAutomaton();
 	bool IsDeterministic();
-	bool CheckWord(std::string& word);
-	bool CheckWordRecursive(std::string& word, size_t index, const std::string& currentState);
+	bool CheckWord(std::vector<std::string>& word);
+
+	void CheckWordRecursive(std::vector<std::string>& word, size_t index, std::string& currentState, bool& result);
+	std::vector<std::string> GenerateWordVector(const std::string& word);
 
 
 	friend std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton);
 private:
+	
 	std::vector<std::string> GetNextStates(std::string currentState, char inputSymbol);
 	bool StartingStateValidation();
 	bool FinalStatesValidation();

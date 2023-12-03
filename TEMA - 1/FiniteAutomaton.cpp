@@ -124,10 +124,34 @@ bool FiniteAutomaton::IsDeterministic()
 	});
 }
 
-bool FiniteAutomaton::CheckWord(std::string& word)
+bool FiniteAutomaton::CheckWord(std::vector<std::string>& word)
 {
-	return CheckWordRecursive(word, 0, GetStartingState());
+	bool ok = false;
+	std::string start = GetStartingState();
+	CheckWordRecursive(word, 0, start, ok);
+
+	return ok;
 }
+
+std::vector<std::string> FiniteAutomaton::GenerateWordVector(const std::string& word)
+{
+	std::vector<std::string> wordVector;
+
+	for (size_t i = 0; i < word.length(); ++i) {
+		for (const std::string& alphabetSymbol : m_inputAlphabet) {
+			if (word.compare(i, alphabetSymbol.length(), alphabetSymbol) == 0) {
+				// Add the matched substring to the vector
+				wordVector.push_back(alphabetSymbol);
+				i += alphabetSymbol.length() - 1;  // Move the index to the end of the matched substring
+				break;  // Move to the next position in the input string
+			}
+		}
+	}
+
+
+	return wordVector;
+}
+
 
 std::vector<std::string> FiniteAutomaton::GetNextStates(std::string currentState, char inputSymbol)
 {
@@ -146,26 +170,34 @@ std::vector<std::string> FiniteAutomaton::GetNextStates(std::string currentState
 	return nextStates;
 }
 
-bool FiniteAutomaton::CheckWordRecursive(std::string& word, size_t index, const std::string& currentState)
+void FiniteAutomaton::CheckWordRecursive(std::vector<std::string>& word, size_t index, std::string& currentState, bool& result)
 {
-	if (index == word.length()) {
+	if (index == word.size()) {
 		// Check if the current state is one of the final states
-		return currentState == "Final";
+		result = std::ranges::find(m_finalStates, currentState) != m_finalStates.end();
+		return;
 	}
 
-	char inputSymbol = word[index];
+	const std::string& inputSymbol = word[index];
 
-	// Get next states based on the input symbol
-	std::vector<std::string> nextStates = GetNextStates(currentState, inputSymbol);
+	std::vector<std::string> nextStates;
 
-	// Recursively check the remaining part of the word for each next state
-	for ( auto& nextState : nextStates) {
-		if (CheckWordRecursive(word, index + 1, nextState)) {
-			return true;  // If any path leads to acceptance, return true
+	for ( auto& transition : m_stateTransitionFunctions) {
+		 auto& [transitionState, transitionSymbol] = transition.first;
+
+		if (transitionState == currentState && transitionSymbol == inputSymbol) {
+			nextStates.insert(nextStates.end(), transition.second.begin(), transition.second.end());
 		}
 	}
 
-	return false;  // All paths from the current state lead to rejection
+	for ( auto& nextState : nextStates) 
+	{
+		CheckWordRecursive(word, index + 1, nextState, result);
+		if (result) 
+		{
+			return;  
+		}
+	}
 }
 
 bool FiniteAutomaton::StartingStateValidation()

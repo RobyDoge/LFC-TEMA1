@@ -11,6 +11,55 @@ bool FiniteAutomaton::VerifyAutomaton()
 		StateTransitionFunctionsValidation();
 }
 
+FiniteAutomaton::FiniteAutomaton(Grammar& grammar)
+{
+	std::vector<std::string> states;
+	states = grammar.GetVn();
+	states.emplace_back("Final");
+	SetStates(states);
+	SetInputAlphabet(grammar.GetVt());
+
+	std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>>> transitions;
+
+	for (const auto& rule : grammar.GetP())
+	{
+		const auto& inputSymbols = rule.first;
+		const auto& outputSymbols = rule.second;
+
+		if (!inputSymbols.empty() && !outputSymbols.empty())
+		{
+			std::string state = inputSymbols[0];
+			std::string inputSymbol = outputSymbols[0];
+			std::vector<std::string> outputStates(outputSymbols.begin() + 1, outputSymbols.end());
+
+			bool allTerminals = true;
+			for (const std::string& s : outputStates)
+			{
+				// Check if the symbol is not in the set of terminal symbols
+				std::vector<std::string> vt = grammar.GetVt();
+				if (std::find(vt.begin(), vt.end(), s) == vt.end())
+				{
+					allTerminals = false;
+					break;
+				}
+			}
+
+			if (allTerminals)
+			{
+				outputStates.emplace_back("Final");
+			}
+
+			transitions.emplace_back(std::make_pair(std::make_pair(state, inputSymbol), outputStates));
+		}
+	}
+
+	SetStateTransitionFunctions(transitions);
+	SetStartingState(grammar.GetS());
+	std::vector<std::string> final;
+	final.emplace_back("Final");
+	SetFinalStates(final);
+}
+
 std::vector<std::string> FiniteAutomaton::GetStates() const
 {
 	return m_states;
@@ -75,16 +124,48 @@ bool FiniteAutomaton::IsDeterministic()
 	});
 }
 
-bool FiniteAutomaton::CheckWord(const std::string& word)
+bool FiniteAutomaton::CheckWord(std::string& word)
 {
-	std::vector<std::string> separatedWord = SeparateWord(word);
+	return CheckWordRecursive(word, 0, GetStartingState());
+}
 
-	if (separatedWord.empty())
-	{
-		return false;
+std::vector<std::string> FiniteAutomaton::GetNextStates(std::string currentState, char inputSymbol)
+{
+	std::vector<std::string> nextStates;
+
+	// Iterate over all state transition functions
+	for ( auto& transition : m_stateTransitionFunctions) {
+		 auto& [transitionState, transitionSymbol] = transition.first;
+
+		// Check if the transition matches the current state and input symbol
+		if (transitionState == currentState && transitionSymbol[0] == inputSymbol) {
+			nextStates.insert(nextStates.end(), transition.second.begin(), transition.second.end());
+		}
 	}
 
+	return nextStates;
+}
 
+bool FiniteAutomaton::CheckWordRecursive(std::string& word, size_t index, const std::string& currentState)
+{
+	if (index == word.length()) {
+		// Check if the current state is one of the final states
+		return currentState == "Final";
+	}
+
+	char inputSymbol = word[index];
+
+	// Get next states based on the input symbol
+	std::vector<std::string> nextStates = GetNextStates(currentState, inputSymbol);
+
+	// Recursively check the remaining part of the word for each next state
+	for ( auto& nextState : nextStates) {
+		if (CheckWordRecursive(word, index + 1, nextState)) {
+			return true;  // If any path leads to acceptance, return true
+		}
+	}
+
+	return false;  // All paths from the current state lead to rejection
 }
 
 bool FiniteAutomaton::StartingStateValidation()
@@ -156,27 +237,57 @@ std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAuto
 	{
 		output << inputSymbol << " , ";
 	}
-	output << "}, \u03B4, " << finiteAutomaton.m_startingState << ", {";
-	for(const auto& finalState : finiteAutomaton.m_finalStates)
+	output << "}, " << finiteAutomaton.m_startingState << ", {";
+	for (const auto& finalState : finiteAutomaton.m_finalStates)
 	{
 		output << finalState << " , ";
 	}
-	output << "}).\n \u03B4 contains the following:\n";
-	for(const auto& [transitionFunction , outputStates] : finiteAutomaton.m_stateTransitionFunctions)
+	output << "}).\n delta contains the following:\n";
+
+	/*for (const auto& [transitionFunction, outputStates] : finiteAutomaton.m_stateTransitionFunctions)
 	{
 		const auto& [state, inputSymbol] = transitionFunction;
-		output << "\u03B4=(" << state << " , " << inputSymbol << ") = ";
-		if(!outputStates.empty())
+		output << "delta=(" << state << " , " << inputSymbol << ") = ";
+
+		if (!outputStates.empty())
 		{
 			output << "{";
-			for(const auto& outputState:outputStates)
+			for (const auto& outputState : outputStates)
 			{
 				output << outputState << " , ";
 			}
 			output << "}\n";
 			continue;
 		}
-		output << " \u00D8\n";
+		output << " ∅\n";
+	}*/
+
+	
+	for (const auto& [transitionFunction, outputStates] : finiteAutomaton.m_stateTransitionFunctions)
+	{
+		const auto& [state, inputSymbol] = transitionFunction;
+		output << "  delta(" << state << ", " << inputSymbol << ") -> {";
+
+		for (const auto& outputState : outputStates)
+		{
+			output << outputState << ", ";
+		}
+
+		output << "}\n";
 	}
+
+
+	output << "q0 = " << finiteAutomaton.m_startingState << "\n";
+
+	output << "F = {";
+	for (const auto& finalState : finiteAutomaton.m_finalStates)
+	{
+		output << finalState << ", ";
+	}
+	output << "}\n";
+
+	return output;
+
 	return output;
 }
+

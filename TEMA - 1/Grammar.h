@@ -1,23 +1,22 @@
 #pragma once
-#include <fstream>
 #include <vector>
 #include <string>
 #include <sstream>
 
-
 class Grammar
 {
 public:
-	Grammar();
-	Grammar(std::ifstream& input);
+	Grammar() = default;				//default constructor
+	Grammar(std::ifstream& input);		//constructor that reads from file and initializes fields
 
 	std::vector<std::string> GetVn();
 	std::vector<std::string> GetVt();
 	std::string GetS();
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> GetP();
+	bool GetGrammarCheck();
 
 	bool IsRegular();
-	void GenerateRandomWord(const std::string& word,std::ostream& outputStream,bool printSteps);
+	void GenerateRandomWord( std::string& word,std::ostream& outputStream,bool printSteps);
 
 	friend std::ostream& operator<<(std::ostream& out, const Grammar& grammar);
 
@@ -26,7 +25,7 @@ private:
 	std::vector<std::string> SeparateBySpaces(std::istringstream& nonSplitStream);
 	std::vector<std::string> SeparateByComma(std::istringstream& nonSplitStream);
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> CreateVectorP(std::ifstream& input);
-	bool ValidateGrammar();
+	bool VerifyGrammar();
 	bool HasSRule();
 	bool ContainsOnlyVnAndVt(std::vector<std::string> symbols);
 	bool HasNonterminal();

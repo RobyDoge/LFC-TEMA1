@@ -1,4 +1,5 @@
 ﻿#include "Grammar.h"
+#include <fstream>
 #include <numeric>
 #include <random>
 #include <ranges>
@@ -7,9 +8,9 @@ Grammar::Grammar(std::ifstream& input)
 {
 	//reads the first line and puts the elements separted by space in m_vn
 	std::string aux;
-	std::getline(input, aux);
-	std::istringstream nonSplitStream(aux);
-	m_vn = SeparateBySpaces(nonSplitStream);
+	std::getline(input, aux);				//reading the first line
+	std::istringstream nonSplitStream(aux);		//
+	m_vn = SeparateBySpaces(nonSplitStream);	//
 	std::getline(input, aux);
 
 	//clears and resets the istringstream 
@@ -27,8 +28,7 @@ Grammar::Grammar(std::ifstream& input)
 	m_p = CreateVectorP(input);
 	input.close();
 
-
-	if (!ValidateGrammar())
+	if (!VerifyGrammar())
 	{
 		m_p.clear();
 		m_s.erase();
@@ -58,6 +58,11 @@ std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Gramm
 	return m_p;
 }
 
+bool Grammar::GetGrammarCheck()
+{
+	return this->VerifyGrammar();
+}
+
 bool Grammar::IsRegular()
 {
 	return std::ranges::all_of(m_p, [&](const auto& rule)
@@ -69,6 +74,7 @@ bool Grammar::IsRegular()
 			std::ranges::find(m_vn, output[0]) == m_vn.end() &&
 			!(output.size() == 2 && std::ranges::find(m_vt, output[1]) != m_vt.end());
 	});
+
 }
 
 //it separates a line into words separated by spaces and puts the words into a vector
@@ -125,7 +131,7 @@ std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> Gramm
 	return auxP;
 }
 
-bool Grammar::ValidateGrammar()
+bool Grammar::VerifyGrammar()
 {
 	for (const std::string& vn : m_vn)
 	{
@@ -205,10 +211,10 @@ std::ostream& operator<<(std::ostream& out, const Grammar& grammar)
 }
 
 
-void Grammar::GenerateRandomWord(const std::string& word, std::ostream& outputStream, const bool printSteps)
+void Grammar::GenerateRandomWord( std::string& word, std::ostream& outputStream, const bool printSteps)
 {
 	if (word == m_s)
-		outputStream << m_s;
+		outputStream << "\n" << m_s;
 	const std::string producedWord = word;
 	std::vector<int> applicable_productions;
 
@@ -243,7 +249,7 @@ void Grammar::GenerateRandomWord(const std::string& word, std::ostream& outputSt
 	const int chosen_production = applicable_productions[distr(gen)];
 
 	//Apply the random production to the producedWord
-	const std::string new_word = ApplyRandomProduction(producedWord, chosen_production);
+	std::string new_word = ApplyRandomProduction(producedWord, chosen_production);
 
 	//This should not really happen but just for safety so we don`t have an infinite loop
 	if (new_word == producedWord)

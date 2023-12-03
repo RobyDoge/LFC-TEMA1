@@ -3,11 +3,14 @@
 #include <string>
 #include <vector>
 
+#include "Grammar.h"
+
 
 class FiniteAutomaton
 {
 public:
 	FiniteAutomaton() = default;
+	FiniteAutomaton(Grammar& grammar);
 
 	std::vector<std::string> GetStates() const;
 	void SetStates(const std::vector<std::string>& states);
@@ -21,15 +24,17 @@ public:
 	std::string GetStartingState() const;
 	void SetStartingState(const std::string& startingState);
 	std::vector<std::string> GetFinalStates() const;
-	void SetFinalStates(const std::vector<std::string>& finalStates);
+	void SetFinalStates(const std::vector<std::string>& finalStates);			//getters &setters
 
 	bool VerifyAutomaton();
 	bool IsDeterministic();
-	bool CheckWord(const std::string& word);
+	bool CheckWord(std::string& word);
+	bool CheckWordRecursive(std::string& word, size_t index, const std::string& currentState);
 
 
 	friend std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton);
 private:
+	std::vector<std::string> GetNextStates(std::string currentState, char inputSymbol);
 	bool StartingStateValidation();
 	bool FinalStatesValidation();
 	bool StateTransitionFunctionsValidation();

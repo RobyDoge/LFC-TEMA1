@@ -19,7 +19,7 @@ public:
 	void GenerateRandomWord( std::string& word,std::ostream& outputStream,bool printSteps);
 
 	friend std::ostream& operator<<(std::ostream& out, const Grammar& grammar);
-
+	std::string GetLastWord();
 private:
 	std::string ApplyRandomProduction(const std::string& input, int production_index);
 	std::vector<std::string> SeparateBySpaces(std::istringstream& nonSplitStream);
@@ -35,6 +35,7 @@ private:
 	std::vector<std::string> m_vt;
 	std::string m_s;
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> m_p;
+	std::string m_lastWord;
 };
 
 

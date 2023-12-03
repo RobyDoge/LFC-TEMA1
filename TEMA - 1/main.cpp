@@ -6,6 +6,7 @@ int main()
 {
     bool ok = true;
     int number_of_words;
+    std::string lastWord;
 	std::ifstream input("input.txt");
 	Grammar grammar(input);             //se citesc din fisier elem unei gramatici regulate
 
@@ -91,9 +92,10 @@ int main()
                 std::cout << "GeneratedWord:\n";
                 wordToCheck = grammar.GetS();
             	grammar.GenerateRandomWord(wordToCheck, std::cout, true);
-                
-                std::cout << "\n" << wordToCheck << "\n";
-                if (automaton.CheckWord(wordToCheck))
+                lastWord = grammar.GetLastWord();
+
+                std::cout << "\n" << lastWord<< "\n";
+                if (automaton.CheckWord(lastWord))
                     std::cout << "Word is accepted!";
                 else std::cout << "Word is not accepted!";
                 break;

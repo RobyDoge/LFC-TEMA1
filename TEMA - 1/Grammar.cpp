@@ -209,6 +209,10 @@ std::ostream& operator<<(std::ostream& out, const Grammar& grammar)
 	}
 	return out;
 }
+std::string Grammar::GetLastWord()
+{
+	return m_lastWord;
+}
 
 
 void Grammar::GenerateRandomWord( std::string& word, std::ostream& outputStream, const bool printSteps)
@@ -216,6 +220,7 @@ void Grammar::GenerateRandomWord( std::string& word, std::ostream& outputStream,
 	if (word == m_s)
 		outputStream << "\n" << m_s;
 	const std::string producedWord = word;
+	m_lastWord = producedWord;
 	std::vector<int> applicable_productions;
 
 	// Check if one of the rules from the left side is applicable for the producedWord 

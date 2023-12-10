@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <set>
+
 #include "FiniteAutomaton.h"
 
 int main()
@@ -8,7 +10,7 @@ int main()
     int number_of_words;
     std::string lastWord;
 	std::ifstream input("input.txt");
-	Grammar grammar(input);             //se citesc din fisier elem unei gramatici regulate
+	Grammar grammar(input);             
 
 	if (grammar.GetGrammarCheck())
     {
@@ -31,13 +33,14 @@ int main()
         return 1;
     }
 
-    int choice;
     if (ok)
     {
-        FiniteAutomaton automaton(grammar);
+	    int choice;
+	    FiniteAutomaton automaton(grammar);
         bool automatonGenerated = false;
         std::string word;
         std::vector<std::string> wordToCheck;
+        char showSteps;
     	do {
             std::cout << "\nMenu:\n";
             std::cout << "1. Print Grammar\n";
@@ -57,11 +60,22 @@ int main()
             case 2: // Generate n random words
                 std::cout << "How many words do yu want to generate?\n";
                 std::cin >> number_of_words;
+                std::cout << "Should the steps be shown? (Y/N)\n";
+                std::cin >> showSteps;
+                std::toupper(showSteps);
+
                 while (number_of_words)
                 {
                     word = grammar.GetS();
-                    grammar.GenerateRandomWord(word, std::cout, true);
-                    number_of_words--;
+                    if(showSteps=='Y')
+                    {
+	                    grammar.GenerateRandomWord(word, std::cout, true);
+                    }
+                    else
+                    {
+	                    grammar.GenerateRandomWord(word, std::cout, false);
+                    }
+                	number_of_words--;
                 }
                 break;
 
@@ -77,7 +91,7 @@ int main()
                     break;
                 }
                 
-                std::cout << "What word do you want to cehck?\n";
+                std::cout << "What word do you want to check?\n";
                 std::cin >> word;
                 wordToCheck = automaton.GenerateWordVector(word);
                 if (automaton.CheckWord(wordToCheck))

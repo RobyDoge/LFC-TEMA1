@@ -264,6 +264,7 @@ void Grammar::GenerateRandomWord( std::string& word, std::ostream& outputStream,
 	if (printSteps)
 		outputStream << new_word;
 	GenerateRandomWord(new_word, outputStream, printSteps);
+	word = new_word;
 }
 
 std::string Grammar::ApplyRandomProduction(const std::string& input, int production_index)
@@ -272,15 +273,15 @@ std::string Grammar::ApplyRandomProduction(const std::string& input, int product
 	const std::string left = std::accumulate(m_p[production_index].first.begin(), m_p[production_index].first.end(),
 	                                         std::string(""));
 	std::string right;
-	if (m_p[production_index].second[0] == "lambda")
+	/*if (m_p[production_index].second[0] == "lambda")
 	{
 		right = "";
 	}
 	else
-	{
+	{*/
 		right = std::accumulate(m_p[production_index].second.begin(), m_p[production_index].second.end(),
 		                        std::string(""));
-	}
+	//}
 
 	//Search the position of the left side of the production in the producedWord
 

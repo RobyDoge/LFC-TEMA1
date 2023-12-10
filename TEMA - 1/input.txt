@@ -1,4 +1,4 @@
-SCD ABN lambda 
+SCD ABN
 ac b
 SCD
 SCD ac,SCD

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <ranges>
 #include <sstream>
-
+#include <fstream>
 
 bool FiniteAutomaton::VerifyAutomaton()
 {
@@ -58,6 +58,7 @@ FiniteAutomaton::FiniteAutomaton(Grammar& grammar)
 	std::vector<std::string> final;
 	final.emplace_back("Final");
 	SetFinalStates(final);
+	SaveToDiskAutomaton();
 }
 
 std::vector<std::string> FiniteAutomaton::GetStates() const
@@ -152,6 +153,12 @@ std::vector<std::string> FiniteAutomaton::GenerateWordVector(const std::string& 
 	return wordVector;
 }
 
+
+void FiniteAutomaton::SaveToDiskAutomaton()
+{
+	std::ofstream file("Finite Automaton.txt", std::ios::trunc);
+	file << *this;
+}
 
 std::vector<std::string> FiniteAutomaton::GetNextStates(std::string currentState, char inputSymbol)
 {
@@ -262,49 +269,49 @@ std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAuto
 	output << "Finite Automaton: M = ({";
 	for (const auto& state : finiteAutomaton.m_states)
 	{
+		if(state == finiteAutomaton.m_states[finiteAutomaton.m_states.size()-1])
+		{
+			output << state;
+			break;
+		}
 		output << state << " , ";
 	}
 	output << "},{";
 	for (const auto& inputSymbol : finiteAutomaton.m_inputAlphabet)
 	{
+		if(inputSymbol == finiteAutomaton.m_inputAlphabet[finiteAutomaton.m_inputAlphabet.size()-1])
+		{
+			output << inputSymbol;
+			break;
+		}
 		output << inputSymbol << " , ";
 	}
 	output << "}, " << finiteAutomaton.m_startingState << ", {";
 	for (const auto& finalState : finiteAutomaton.m_finalStates)
 	{
+		if(finalState == finiteAutomaton.m_finalStates[finiteAutomaton.m_finalStates.size()-1])
+		{
+			output << finalState;
+			break;
+		}
 		output << finalState << " , ";
 	}
-	output << "}).\n delta contains the following:\n";
-
-	/*for (const auto& [transitionFunction, outputStates] : finiteAutomaton.m_stateTransitionFunctions)
-	{
-		const auto& [state, inputSymbol] = transitionFunction;
-		output << "delta=(" << state << " , " << inputSymbol << ") = ";
-
-		if (!outputStates.empty())
-		{
-			output << "{";
-			for (const auto& outputState : outputStates)
-			{
-				output << outputState << " , ";
-			}
-			output << "}\n";
-			continue;
-		}
-		output << " ∅\n";
-	}*/
-
+	output << "}).\ndelta contains the following:\n";
 	
 	for (const auto& [transitionFunction, outputStates] : finiteAutomaton.m_stateTransitionFunctions)
 	{
 		const auto& [state, inputSymbol] = transitionFunction;
-		output << "  delta(" << state << ", " << inputSymbol << ") -> {";
+		output << " -delta(" << state << ", " << inputSymbol << ") -> {";
 
 		for (const auto& outputState : outputStates)
 		{
+			if(outputState==outputStates[outputStates.size()-1])
+			{
+				output << outputState;
+				continue;
+			}
 			output << outputState << ", ";
 		}
-
 		output << "}\n";
 	}
 
@@ -314,11 +321,14 @@ std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAuto
 	output << "F = {";
 	for (const auto& finalState : finiteAutomaton.m_finalStates)
 	{
+		if (finalState == finiteAutomaton.m_finalStates[finiteAutomaton.m_finalStates.size() - 1])
+		{
+			output << finalState;
+			break;
+		}
 		output << finalState << ", ";
 	}
 	output << "}\n";
-
-	return output;
 
 	return output;
 }

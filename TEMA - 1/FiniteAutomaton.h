@@ -33,10 +33,11 @@ public:
 	void CheckWordRecursive(std::vector<std::string>& word, size_t index, std::string& currentState, bool& result);
 	std::vector<std::string> GenerateWordVector(const std::string& word);
 
-
 	friend std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton);
+
+
 private:
-	
+	void SaveToDiskAutomaton();
 	std::vector<std::string> GetNextStates(std::string currentState, char inputSymbol);
 	bool StartingStateValidation();
 	bool FinalStatesValidation();

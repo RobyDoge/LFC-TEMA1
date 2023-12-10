@@ -1,0 +1,8 @@
+Finite Automaton: M = ({SCD , ABN , Final},{ac , b}, SCD, {Final}).
+delta contains the following:
+ -delta(SCD, ac) -> {SCD}
+ -delta(SCD, ac) -> {ABN}
+ -delta(ABN, ac) -> {Final}
+ -delta(ABN, b) -> {ABN}
+q0 = SCD
+F = {Final}

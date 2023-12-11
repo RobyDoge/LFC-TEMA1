@@ -24,25 +24,23 @@ public:
 	std::string GetStartingState() const;
 	void SetStartingState(const std::string& startingState);
 	std::vector<std::string> GetFinalStates() const;
-	void SetFinalStates(const std::vector<std::string>& finalStates);			//getters &setters
+	void SetFinalStates(const std::vector<std::string>& finalStates);		
 
 	bool VerifyAutomaton();
 	bool IsDeterministic();
 	bool CheckWord(std::vector<std::string>& word);
 
-	void CheckWordRecursive(std::vector<std::string>& word, size_t index, std::string& currentState, bool& result);
-	std::vector<std::string> GenerateWordVector(const std::string& word);
+	void CheckWordRecursive(std::vector<std::string>& word, size_t index, const std::string& currentState, bool& result);
+	std::vector<std::string> GenerateWordVector(const std::string& word) const;
 
 	friend std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton);
 
 
 private:
-	void SaveToDiskAutomaton();
-	std::vector<std::string> GetNextStates(std::string currentState, char inputSymbol);
+	void SaveToDiskAutomaton() const;
 	bool StartingStateValidation();
 	bool FinalStatesValidation();
 	bool StateTransitionFunctionsValidation();
-	std::vector<std::string> SeparateWord(const std::string& word);
 
 private:
 	std::vector<std::string> m_states;

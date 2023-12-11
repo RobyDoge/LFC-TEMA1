@@ -24,9 +24,9 @@ FiniteAutomaton::FiniteAutomaton(Grammar& grammar)
 	for (const auto& rule : grammar.GetP())
 	{
 		const auto& inputSymbols = rule.first;
-		const auto& outputSymbols = rule.second;
 
-		if (!inputSymbols.empty() && !outputSymbols.empty())
+		if (const auto& outputSymbols = rule.second; 
+			!inputSymbols.empty() && !outputSymbols.empty())
 		{
 			std::string state = inputSymbols[0];
 			std::string inputSymbol = outputSymbols[0];
@@ -35,9 +35,8 @@ FiniteAutomaton::FiniteAutomaton(Grammar& grammar)
 			bool allTerminals = true;
 			for (const std::string& s : outputStates)
 			{
-				// Check if the symbol is not in the set of terminal symbols
-				std::vector<std::string> vt = grammar.GetVt();
-				if (std::find(vt.begin(), vt.end(), s) == vt.end())
+				if (std::vector<std::string> vt = grammar.GetVt(); 
+					std::ranges::find(vt, s) == vt.end())
 				{
 					allTerminals = false;
 					break;
@@ -49,7 +48,7 @@ FiniteAutomaton::FiniteAutomaton(Grammar& grammar)
 				outputStates.emplace_back("Final");
 			}
 
-			transitions.emplace_back(std::make_pair(std::make_pair(state, inputSymbol), outputStates));
+			transitions.emplace_back(std::make_pair(state, inputSymbol), outputStates);
 		}
 	}
 
@@ -134,53 +133,34 @@ bool FiniteAutomaton::CheckWord(std::vector<std::string>& word)
 	return ok;
 }
 
-std::vector<std::string> FiniteAutomaton::GenerateWordVector(const std::string& word)
+std::vector<std::string> FiniteAutomaton::GenerateWordVector(const std::string& word) const
 {
 	std::vector<std::string> wordVector;
 
 	for (size_t i = 0; i < word.length(); ++i) {
 		for (const std::string& alphabetSymbol : m_inputAlphabet) {
-			if (word.compare(i, alphabetSymbol.length(), alphabetSymbol) == 0) {
-				// Add the matched substring to the vector
+			if (word.compare(i, alphabetSymbol.length(), alphabetSymbol) == 0) 
+			{
 				wordVector.push_back(alphabetSymbol);
-				i += alphabetSymbol.length() - 1;  // Move the index to the end of the matched substring
-				break;  // Move to the next position in the input string
+				i += alphabetSymbol.length() - 1; 
+				break; 
 			}
 		}
 	}
-
-
 	return wordVector;
 }
 
 
-void FiniteAutomaton::SaveToDiskAutomaton()
+void FiniteAutomaton::SaveToDiskAutomaton() const
 {
 	std::ofstream file("Finite Automaton.txt", std::ios::trunc);
 	file << *this;
 }
 
-std::vector<std::string> FiniteAutomaton::GetNextStates(std::string currentState, char inputSymbol)
+void FiniteAutomaton::CheckWordRecursive(std::vector<std::string>& word, const size_t index, const std::string& currentState, bool& result)
 {
-	std::vector<std::string> nextStates;
-
-	// Iterate over all state transition functions
-	for ( auto& transition : m_stateTransitionFunctions) {
-		 auto& [transitionState, transitionSymbol] = transition.first;
-
-		// Check if the transition matches the current state and input symbol
-		if (transitionState == currentState && transitionSymbol[0] == inputSymbol) {
-			nextStates.insert(nextStates.end(), transition.second.begin(), transition.second.end());
-		}
-	}
-
-	return nextStates;
-}
-
-void FiniteAutomaton::CheckWordRecursive(std::vector<std::string>& word, size_t index, std::string& currentState, bool& result)
-{
-	if (index == word.size()) {
-		// Check if the current state is one of the final states
+	if (index == word.size()) 
+	{
 		result = std::ranges::find(m_finalStates, currentState) != m_finalStates.end();
 		return;
 	}
@@ -189,11 +169,11 @@ void FiniteAutomaton::CheckWordRecursive(std::vector<std::string>& word, size_t 
 
 	std::vector<std::string> nextStates;
 
-	for ( auto& transition : m_stateTransitionFunctions) {
-		 auto& [transitionState, transitionSymbol] = transition.first;
-
-		if (transitionState == currentState && transitionSymbol == inputSymbol) {
-			nextStates.insert(nextStates.end(), transition.second.begin(), transition.second.end());
+	for ( auto& [inputAndTransitionSymbol, outputSymbol] : m_stateTransitionFunctions) 
+	{
+		if (auto& [state, transitionSymbol] = inputAndTransitionSymbol; 
+			state == currentState && transitionSymbol == inputSymbol) {
+			nextStates.insert(nextStates.end(), outputSymbol.begin(), outputSymbol.end());
 		}
 	}
 
@@ -231,37 +211,6 @@ bool FiniteAutomaton::StateTransitionFunctionsValidation()
 				return std::ranges::find(m_states, outputState) != m_states.end();
 			});
 	});
-}
-
-std::vector<std::string> FiniteAutomaton::SeparateWord(const std::string& word)
-{
-	std::string newWord = word;
-	bool validWord = true;
-	for (const auto& symbol : m_inputAlphabet)
-	{
-		size_t position = newWord.find(symbol);
-		while (position != std::string::npos)
-		{
-			newWord.insert(position + symbol.length(), " ");
-			position = newWord.find(symbol, position + symbol.length() + 1);
-		}
-	}
-	std::vector<std::string> stateChangeSequence{};
-	std::istringstream nonSplitStream(newWord);
-	std::string symbol{};
-	while (nonSplitStream >> symbol)
-	{
-		stateChangeSequence.push_back(symbol);
-	}
-
-	if (std::ranges::all_of(stateChangeSequence, [&](const auto& checkSymbol)
-			{
-				return std::ranges::find(m_inputAlphabet, checkSymbol) != m_inputAlphabet.end();
-			}))
-	{
-		return stateChangeSequence;
-	}
-	return {};
 }
 
 std::ostream& operator<<(std::ostream& output, const FiniteAutomaton& finiteAutomaton)

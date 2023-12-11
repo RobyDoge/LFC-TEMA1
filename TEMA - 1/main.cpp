@@ -53,12 +53,12 @@ int main()
             std::cin >> choice;
 
             switch (choice) {
-            case 1: // Print Grammar
+            case 1: 
                 std::cout << grammar;
                 break;
 
-            case 2: // Generate n random words
-                std::cout << "How many words do yu want to generate?\n";
+            case 2:
+                std::cout << "How many words do you want to generate?\n";
                 std::cin >> number_of_words;
                 std::cout << "Should the steps be shown? (Y/N)\n";
                 std::cin >> showSteps;
@@ -117,7 +117,7 @@ int main()
                 else std::cout << "Word is not accepted!";
                 break;
 
-            case 0: // Exit
+            case 0:
                 std::cout << "Exiting program.\n";
                 break;
 
